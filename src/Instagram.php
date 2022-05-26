@@ -6,6 +6,7 @@ namespace Dymantic\InstagramFeed;
 
 use Dymantic\InstagramFeed\Exceptions\BadTokenException;
 use Dymantic\InstagramFeed\Exceptions\HttpException;
+use Dymantic\InstagramFeed\Exceptions\StateFormatException;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Config;
 
@@ -37,12 +38,23 @@ class Instagram
         $this->redirect_uri = $config["auth_callback_route"];
     }
 
-    public function authUrlForProfile($profile)
+    public function authUrlForProfile($profile, $state = [])
     {
         $client_id = $this->client_id;
         $redirect = $this->redirectUriForProfile($profile->id);
 
-        return "https://api.instagram.com/oauth/authorize/?client_id=$client_id&redirect_uri=$redirect&scope=user_profile,user_media&response_type=code&state={$profile->identity_token}";
+        // place identity token at index 0 in state array
+        array_unshift($state, $profile->identity_token);
+        $separator = Config::get('state_separator') ?: ',';
+        $stateString = join($separator, $state);
+
+        // validate state string
+        if(!preg_match('/^[a-zA-Z0-9,_]+?/', $stateString))
+        {
+            throw new StateFormatException('the state may only include letters, numbers as well as underscores');
+        }
+
+        return "https://api.instagram.com/oauth/authorize/?client_id=$client_id&redirect_uri=$redirect&scope=user_profile,user_media&response_type=code&state={$stateString}";
     }
 
     private function redirectUriForProfile($profile_id)

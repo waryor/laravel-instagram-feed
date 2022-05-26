@@ -91,6 +91,23 @@ class ProfilesTest extends TestCase
     /**
      * @test
      */
+    public function a_profile_can_generate_the_correct_auth_init_url_with_valid_state()
+    {
+        $profile = Profile::create(['username' => 'test_user']);
+        $app_url = rtrim(config('app.url'), '/');
+        $full_redirect_uri = "{$app_url}/instagram"; //http://test.test/instagram
+
+        $expected = '/https:\/\/api.instagram.com\/oauth\/authorize\/\?client_id=TEST_CLIENT_ID\&redirect_uri=http:\/\/test.test\/instagram\&scope=user_profile,user_media\&response_type=code\&state=[a-zA-Z0-9,_]+?$/';
+
+        $this->assertMatchesRegularExpression($expected, $profile->getInstagramAuthUrl([
+            'state_data1',
+            'state_data2'
+        ]));
+    }
+
+    /**
+     * @test
+     */
     public function a_profile_can_request_an_access_token_from_a_successful_auth_redirect()
     {
         $profile = Profile::create(['username' => 'test_user']);

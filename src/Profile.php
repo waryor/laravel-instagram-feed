@@ -46,7 +46,7 @@ class Profile extends Model
         });
     }
 
-    public function getInstagramAuthUrl(): string
+    public function getInstagramAuthUrl($state = []): string
     {
         $instagram = App::make(Instagram::class);
 
@@ -55,7 +55,7 @@ class Profile extends Model
             $this->save();
         }
 
-        return $instagram->authUrlForProfile($this);
+        return $instagram->authUrlForProfile($this, $state);
     }
 
     public function tokens()

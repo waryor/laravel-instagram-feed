@@ -14,9 +14,10 @@ class AccessTokenController
 {
     public function handleRedirect(Request $request)
     {
-        $profile = Profile::usingIdentityToken($request->input('state', ''));
-
-
+        $state = $request->input('state', '');
+        $identity_token = str_split(Config::get('state_separator') ?? ',', $state)[0];
+        $profile = Profile::usingIdentityToken($identity_token);
+        
         if (!$profile) {
             Log::error('unable to retrieve IG profile');
             return Redirect::to(Config::get('instagram-feed.failure_redirect_to'));

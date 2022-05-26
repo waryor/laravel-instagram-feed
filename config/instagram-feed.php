@@ -50,4 +50,9 @@ return [
      * attempting to refresh the Instagram feed.
      */
     'notify_on_error' => null,
+
+    /*
+     * Separator sign for multiple values that are passed to the state
+     */
+    'state_separator' => ','
 ];
